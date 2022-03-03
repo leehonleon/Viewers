@@ -39,7 +39,7 @@ window.config = {
       configuration: {},
     },
   ],
-  httpErrorHandler: error => {
+  httpErrorHandler: (error) => {
     // This is 429 when rejected from the public idc sandbox too often.
     console.warn(error.status);
 
@@ -66,6 +66,15 @@ window.config = {
   //   },
   // },
   defaultDataSourceName: 'dicomweb',
+
+  oidc: [
+    {
+      // ~ REQUIRED
+      // Authorization Server URL
+      authority: '/api/v2/auth/osl',
+    },
+  ],
+
   hotkeys: [
     {
       commandName: 'incrementActiveViewport',

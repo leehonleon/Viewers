@@ -8,7 +8,6 @@ import WorkList from './WorkList';
 import Local from './Local';
 import NotFound from './NotFound';
 import buildModeRoutes from './buildModeRoutes';
-import PrivateRoute from './PrivateRoute';
 
 // TODO: Make these configurable
 // TODO: Include "routes" debug route if dev build
@@ -47,8 +46,14 @@ const createRoutes = ({
 
   const allRoutes = [...routes, ...bakedInRoutes];
 
-  function RouteWithErrorBoundary({ route, ...rest }) {
-    // eslint-disable-next-line react/jsx-props-no-spreading
+  function RouteWithErrorBoundary({ route, handleUnauthenticated, ...rest }) {
+    if (route.private === true) {
+      let state = UserAuthenticationService.getState();
+      if (!state || !state.user) {
+        handleUnauthenticated();
+      }
+    }
+
     return (
       <ErrorBoundary context={`Route ${route.path}`} fallbackRoute="/">
         <route.children
@@ -67,20 +72,18 @@ const createRoutes = ({
   return (
     <Routes basename={routerBasename}>
       {allRoutes.map((route, i) => {
-        return route.private === true ? (
-          <PrivateRoute
-            key={i}
-            path={route.path}
-            handleUnauthenticated={
-              UserAuthenticationService.handleUnauthenticated
-            }
-            element={<RouteWithErrorBoundary route={route} />}
-          />
-        ) : (
+        return (
           <Route
             key={i}
             path={route.path}
-            element={<RouteWithErrorBoundary route={route} />}
+            element={
+              <RouteWithErrorBoundary
+                route={route}
+                handleUnauthenticated={
+                  UserAuthenticationService.handleUnauthenticated
+                }
+              />
+            }
           />
         );
       })}

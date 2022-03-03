@@ -1,9 +1,7 @@
 import React from 'react';
 import { useEffect } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router';
-import CallbackPage from '../routes/CallbackPage';
-import SignoutCallbackComponent from '../routes/SignoutCallbackComponent';
-import getUserManagerForOpenIdConnectClient from './getUserManagerForOpenIdConnectClient.js';
+import { Route, Routes, useNavigate } from 'react-router';
+import getUserManagerForConnectClient from './getUserManagerForConnectClient.js';
 
 function _isAbsoluteUrl(url) {
   return url.includes('http://') || url.includes('https://');
@@ -33,66 +31,45 @@ const initUserManager = (oidc, routerBasename) => {
   const { protocol, host } = window.location;
   const baseUri = `${protocol}//${host}${routerBasename}`;
 
-  const redirect_uri = firstOpenIdClient.redirect_uri || '/callback';
-  const silent_redirect_uri =
-    firstOpenIdClient.silent_redirect_uri || '/silent-refresh.html';
-  const post_logout_redirect_uri =
-    firstOpenIdClient.post_logout_redirect_uri || '/';
+  const redirect_uri = firstOpenIdClient.redirect_uri || '/goto';
 
   const openIdConnectConfiguration = Object.assign({}, firstOpenIdClient, {
     redirect_uri: _makeAbsoluteIfNecessary(redirect_uri, baseUri),
-    silent_redirect_uri: _makeAbsoluteIfNecessary(
-      silent_redirect_uri,
-      baseUri
-    ),
-    post_logout_redirect_uri: _makeAbsoluteIfNecessary(
-      post_logout_redirect_uri,
-      baseUri
-    ),
   });
 
-  return getUserManagerForOpenIdConnectClient(openIdConnectConfiguration);
+  return getUserManagerForConnectClient(openIdConnectConfiguration);
 }
 
-function LoginComponent(userManager) {
+function LoginComponent({ userManager, onRedirectSuccess ,onRedirectFailed}) {
   const queryParams = new URLSearchParams(location.search);
   const iss = queryParams.get('iss');
-  const loginHint = queryParams.get('login_hint');
-  const targetLinkUri = queryParams.get('target_link_uri');
-  if (iss !== oidcAuthority) {
-    console.error(
-      'iss of /login does not match the oidc authority'
-    );
-    return null;
-  }
+  const studyInstanceUIDs = queryParams.get('StudyInstanceUIDs');
 
-  userManager.removeUser().then(() => {
-    if (targetLinkUri !== null) {
-      const ohifRedirectTo = {
-        pathname: new URL(targetLinkUri).pathname,
-      };
-      sessionStorage.setItem(
-        'ohif-redirect-to',
-        JSON.stringify(ohifRedirectTo)
-      );
-    } else {
-      const ohifRedirectTo = {
-        pathname: '/',
-      };
-      sessionStorage.setItem(
-        'ohif-redirect-to',
-        JSON.stringify(ohifRedirectTo)
-      );
-    }
-
-    if (loginHint !== null) {
-      userManager.signinRedirect({ login_hint: loginHint });
-    } else {
-      userManager.signinRedirect();
-    }
+  fetch(userManager.settings.authority,{
+      method:'post',
+      headers:{
+          'Accept':'application/json,text/plain,*/*', /* 格式限制：json、文本、其他格式 */
+          'Content-Type':'application/x-www-form-urlencoded', /* 请求内容类型 */
+          'Authorization': `Bearer ${iss}`
+      },
+  }).then((response)=>{
+      if (response.status != 200 ) {
+        throw new Error(response.statusText);
+      }
+      return response.json()
+  }).then((data)=>{
+      onRedirectSuccess(data)
+  }).catch(function(error){
+      console.log(error)
+      onRedirectFailed()
   });
 
-  return null;
+  sessionStorage.setItem(
+    'ohif-redirect-to',
+    '/viewer?StudyInstanceUIDs=' + studyInstanceUIDs
+  );
+
+  return <div>Redirecting...</div>;
 }
 
 function OpenIdConnectRoutes({
@@ -103,17 +80,23 @@ function OpenIdConnectRoutes({
   const userManager = initUserManager(oidc, routerBasename);
 
   const getAuthorizationHeader = () => {
+    let state = UserAuthenticationService.getState()
+    if (!state || !state.enabled || !state.user){
+      handleUnauthenticated()
+    }
+
     const user = UserAuthenticationService.getUser();
 
     return {
-      Authorization: `Bearer ${user.access_token}`
+      Authorization: `Bearer ${user?.access_token}`
     };
   }
 
   const handleUnauthenticated = () => {
-    userManager.signinRedirect()
+    return navigate(
+      "/local"
+    )
 
-    // return null because this is used in a react component
     return null;
   };
 
@@ -128,61 +111,28 @@ function OpenIdConnectRoutes({
     });
   }, [])
 
-  const oidcAuthority = oidc[0].authority;
-
-  const location = useLocation();
-  const { pathname, search } = location;
-
-  const redirect_uri = new URL(userManager.settings._redirect_uri).pathname//.replace(routerBasename,'')
-  const silent_refresh_uri = new URL(userManager.settings._silent_redirect_uri).pathname//.replace(routerBasename,'')
-  const post_logout_redirect_uri = new URL(userManager.settings._post_logout_redirect_uri).pathname//.replace(routerBasename,'');
-
-  // const pathnameRelative = pathname.replace(routerBasename,'');
-
-  if (pathname !== redirect_uri) {
-    sessionStorage.setItem(
-      'ohif-redirect-to',
-      JSON.stringify({ pathname, search })
-    );
-  }
+  const redirect_uri = new URL(userManager.settings.redirect_uri).pathname
 
   return (
     <Routes basename={routerBasename}>
       <Route
-        path={silent_refresh_uri}
-        onEnter={window.location.reload}
-      />
-      <Route
-        path={post_logout_redirect_uri}
+        path={redirect_uri}
         element={
-          <SignoutCallbackComponent
-            userManager={userManager}
-            successCallback={() => console.log('Signout successful')}
-            errorCallback={error => {
-              console.warn(error);
-              console.warn('Signout failed');
+          <LoginComponent userManager={userManager}
+            onRedirectSuccess={(data) => {
+              const path  = sessionStorage.getItem('ohif-redirect-to');
+
+              UserAuthenticationService.setUser(data.token);
+
+              navigate(path)
+            }}
+            onRedirectFailed={() => {
+              UserAuthenticationService.setUser('');
+
+              navigate('/local')
             }}
           />
         }
-      />
-      <Route
-        path={redirect_uri}
-        element={<CallbackPage userManager={userManager} onRedirectSuccess={(user) => {
-          const { pathname, search = '' } = JSON.parse(
-            sessionStorage.getItem('ohif-redirect-to')
-          );
-
-          UserAuthenticationService.setUser(user);
-
-          navigate({
-            pathname,
-            search
-          })
-        }}/>}
-      />
-      <Route
-        path="/login"
-        element={<LoginComponent userManager={userManager} oidcAuthority={oidcAuthority}/>}
       />
     </Routes>
   );
