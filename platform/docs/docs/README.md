@@ -12,7 +12,7 @@ Key features:
 
 - Designed to load large radiology studies as quickly as possible. Retrieves
   metadata ahead of time and streams in imaging pixel data as needed.
-- Leverages [Cornerstone.js](https://cornerstonejs.org/) for decoding,
+- Leverages [Cornerstone3D](https://github.com/cornerstonejs/cornerstone3D-beta) for decoding,
   rendering, and annotating medical images.
 - Works out-of-the-box with Image Archives that support [DICOMWeb][dicom-web].
   Offers a Data Source API for communicating with archives over proprietary API
@@ -76,7 +76,7 @@ https://pubmed.ncbi.nlm.nih.gov/29092955/
 
 
 **Note:** If you use or find this repository helpful, please take the time to
-star this repository on Github. This is an easy way for us to assess adoption
+star this repository on Github. This is an easy way for us to assess adoption,
 and it can help us obtain future funding for the project.
 
 ## License

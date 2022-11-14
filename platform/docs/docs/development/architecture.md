@@ -11,7 +11,7 @@ possible use cases and decided to significantly change and improve the
 architecture.
 
 Below, we aim to demystify that complexity by providing insight into how
-`OHIF Platform` is architected, and the role each of it's dependent libraries
+`OHIF Platform` is architected, and the role each of its dependent libraries
 plays.
 
 ## Overview
@@ -24,15 +24,16 @@ you'll see the following:
 ```bash
 │
 ├── extensions
-│   ├── _example             # Skeleton of example extension
-│   ├── default              # default functionalities
-│   ├── cornerstone          # 2D images w/ Cornerstone.js
-│   ├── measurement-tracking # measurement tracking
-│   ├── dicom-sr             # Structured reports
-│   └── dicom-pdf            # View DICOM wrapped PDFs in viewport
+│   ├── _example              # Skeleton of example extension
+│   ├── default               # default functionalities
+│   ├── cornerstone           # 2D/3D images w/ Cornerstonejs
+│   ├── cornerstone-dicom-sr  # Structured reports
+│   ├── measurement-tracking  # measurement tracking
+│   └── dicom-pdf             # View DICOM wrapped PDFs in viewport
 │
 ├── modes
 │   └── longitudinal         # longitudinal measurement tracking mode
+|   └── basic-dev-mode       # basic viewer with Cornerstone (a developer focused mode)
 │
 ├── platform
 │   ├── core                 # Business Logic
@@ -46,7 +47,7 @@ you'll see the following:
 └── README.md
 ```
 
-OHIF v3 is comprised of the following components, described in detail in further
+OHIF v3 is composed of the following components, described in detail in further
 sections:
 
 - `@ohif/viewer`: The core framework that controls extension registration, mode
@@ -62,7 +63,7 @@ sections:
 
 ## Extensions
 
-The `extensions` directory contains many packages that provides essential
+The `extensions` directory contains many packages that provide essential
 functionalities such as rendering, study/series browsers, measurement tracking
 that modes can consume to enable a certain workflow. Extensions have had their
 behavior changed in `OHIF-v3` and their api is expanded. In summary:
@@ -183,7 +184,7 @@ you would need to recreate.
 
 This is a great question. Modes are designed to consume extensions, so you
 should implement your functionality in one of the modules of your new extension,
-and let the mode to consume it. This way, in future, if you needed another mode
+and let the mode consume it. This way, in the future, if you needed another mode
 that utilizes the same functionality, you can easily hook the extension to the
 new mode as well.
 

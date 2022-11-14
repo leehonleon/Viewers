@@ -15,7 +15,7 @@ we make to the OHIF Viewer, then follow these steps:
 - [Fork][fork-a-repo] the [OHIF/Viewers][ohif-viewers-repo] repository
 - [Create a local clone][clone-a-repo] of your fork
   - `git clone https://github.com/YOUR-USERNAME/Viewers`
-- Add OHIF/Viewers as a [remote repository][add-remote-repo] labled `upstream`
+- Add OHIF/Viewers as a [remote repository][add-remote-repo] labeled `upstream`
   - Navigate to the cloned project's directory
   - `git remote add upstream https://github.com/OHIF/Viewers.git`
 
@@ -23,6 +23,11 @@ With this setup, you can now [sync your fork][sync-changes] to keep it
 up-to-date with the upstream (original) repository. This is called a "Triangular
 Workflow" and is common for Open Source projects. The GitHub blog has a [good
 graphic that illustrates this setup][triangular-workflow].
+
+### `v3-stable` branch
+Currently the stable branch for OHIF-v3 is `v3-stable`. Once the v3-stable branch has
+feature parity with the master branch, `v3-stable` will be pushed to the master branch.
+You can read more about the roadmap timeline [here](https://ohif.org/roadmap).
 
 ### Private
 
@@ -106,6 +111,6 @@ yarn run build
 [add-remote-repo]: https://help.github.com/en/articles/fork-a-repo#step-3-configure-git-to-sync-your-fork-with-the-original-spoon-knife-repository
 [sync-changes]: https://help.github.com/en/articles/syncing-a-fork
 [triangular-workflow]: https://github.blog/2015-07-29-git-2-5-including-multiple-worktrees-and-triangular-workflows/#improved-support-for-triangular-workflows
-[ohif-viewers-repo]: https://github.com/OHIF/Viewers
+[ohif-viewers-repo]: https://github.com/OHIF/Viewers/tree/v3-stable
 [ohif-viewers]: https://github.com/OHIF/Viewers
 <!-- prettier-ignore-end -->

@@ -11,9 +11,27 @@ and other resources that we have provided to the community in the past:
 
 ## 2022
 
+### OHIF Demo to Interns
+[[Slides]](https://docs.google.com/presentation/d/1a2PkUnqkVMaXaBsuFn7-PPlBJULU3dBwzI_44gKFeYI/edit?usp=sharing)
+
+### SIIM 2022 - Updates from the Imaging Informatics Community
+We participated in the SIIM 2022 conference to give update for the imaging
+informatics community.
+[[Slides]](https://docs.google.com/presentation/d/1EUGaUzQtGhZbZWpGLe6ONqChpVMw9Qr9l3KHODevMow/edit?usp=sharing)
+[[Video]](https://vimeo.com/734463662/dbd5a88371)
+
+### The Imaging Network Ontario - Remote
+
+The Imaging Network Ontario (ImNO) is an annual symposium that brings together
+medical imaging researchers and scientists from across Canada to share
+knowledge, ideas, and experiences.
+[[Slides]](https://docs.google.com/presentation/d/18XZDon4-Sitc2a70V5sFyhyUVZI_mIgfXHGtdxhZMjE/edit?usp=sharing)
+[[Video]](https://vimeo.com/691134870/ad7d308a44)
+
+
 ### [NA-MIC Project Week 36th 2022 - Remote](https://github.com/NA-MIC/ProjectWeek/blob/master/PW36_2022_Virtual/README.md)
 
-The Project Week is a week-long hackathon of hands on activity in which medical
+The Project Week is a week-long hackathon of hands-on activity in which medical
 image computing researchers. OHIF team participated and gave a talk on OHIF and
 Cornerstone in the 36th Project Week:
 [[Slides]](https://docs.google.com/presentation/d/1-GtOKmr2cQi-r3OFyseSmgLeurtB3KXUkGMx2pVLh1I/edit?usp=sharing)
@@ -23,7 +41,7 @@ Cornerstone in the 36th Project Week:
 
 ### [NA-MIC Project Week 35th 2021 - Remote](https://github.com/NA-MIC/ProjectWeek/tree/master/PW35_2021_Virtual)
 
-The Project Week is a week-long hackathon of hands on activity in which medical
+The Project Week is a week-long hackathon of hands-on activity in which medical
 image computing researchers. OHIF team participated in the 35th Project Week
 in 2021.
 [[Slides]](https://docs.google.com/presentation/d/1KYNjuiI8lT1foQ4P9TGNV0lBhM6H-5KBs0wkYj4JJbk/edit?usp=sharing)

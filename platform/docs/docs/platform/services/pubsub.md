@@ -10,7 +10,7 @@ sidebar_label: Pub Sub
 Publish–subscribe pattern is a messaging pattern that is one of the fundamentals
 patterns used in reusable software components.
 
-In short, services that implements this pattern, can have listeners subscribed
+In short, services that implement this pattern, can have listeners subscribed
 to their broadcasted events. After the event is fired, the corresponding
 listener will execute the function that is registered.
 
@@ -58,8 +58,7 @@ async function defaultRouteInit({
   const { unsubscribe: seriesAddedUnsubscribe } = DicomMetadataStore.subscribe(
     DicomMetadataStore.EVENTS.SERIES_ADDED,
     ({ StudyInstanceUID }) => {
-      const studyMetadata = DicomMetadataStore.getStudy(StudyInstanceUID);
-      HangingProtocolService.run(studyMetadata);
+      HangingProtocolService.run({studies, displaySets, activeStudy});
     }
   );
   unsubscriptions.push(seriesAddedUnsubscribe);
@@ -71,7 +70,7 @@ async function defaultRouteInit({
 ## Unsubscription
 
 You need to be careful if you are adding custom subscriptions to the app. Each
-subscription will return a unsubscription function that needs to be executed on
+subscription will return an unsubscription function that needs to be executed on
 component destruction to avoid adding multiple subscriptions to the same
 observer.
 
@@ -88,11 +87,6 @@ export default function ModeRoute(/**..**/) {
 
     extensionManager.onModeEnter();
     mode?.onModeEnter({ servicesManager, extensionManager });
-
-    hangingProtocols.forEach(extentionProtocols => {
-      const { protocols } = extensionManager.getModuleEntry(extentionProtocols);
-      HangingProtocolService.addProtocols(protocols);
-    });
 
     const setupRouteInit = async () => {
       if (route.init) {

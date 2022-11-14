@@ -3,6 +3,31 @@ import EVENTS from './EVENTS';
 
 const displaySetCache = [];
 
+/**
+ * Find an instance in a list of instances, comparing by SOP instance UID
+ */
+const findInSet = (instance, list) => {
+  if (!list) return false;
+  for (const elem of list) {
+    if (!elem) continue;
+    if (elem === instance) return true;
+    if (elem.SOPInstanceUID === instance.SOPInstanceUID) return true;
+  }
+  return false;
+};
+
+/**
+ * Find an instance in a display set
+ * @returns true if found
+ */
+const findInstance = (instance, displaySets) => {
+  for (const displayset of displaySets) {
+    if (findInSet(instance, displayset.images)) return true;
+    if (findInSet(instance, displayset.others)) return true;
+  }
+  return false;
+};
+
 export default class DisplaySetService {
   constructor() {
     this.activeDisplaySets = [];
@@ -50,7 +75,11 @@ export default class DisplaySetService {
     );
   };
 
-  getDisplaySetForSOPInstanceUID(SOPInstanceUID, SeriesInstanceUID) {
+  getDisplaySetForSOPInstanceUID(
+    SOPInstanceUID,
+    SeriesInstanceUID,
+    frameNumber
+  ) {
     const displaySets = SeriesInstanceUID
       ? this.getDisplaySetsForSeries(SeriesInstanceUID)
       : this.getDisplaySetCache();
@@ -62,6 +91,20 @@ export default class DisplaySetService {
     });
 
     return displaySet;
+  }
+
+  setDisplaySetMetadataInvalidated(displaySetInstanceUID) {
+    const displaySet = this.getDisplaySetByUID(displaySetInstanceUID);
+
+    if (!displaySet) {
+      return;
+    }
+
+    // broadcast event to update listeners with the new displaySets
+    this._broadcastEvent(
+      EVENTS.DISPLAY_SET_SERIES_METADATA_INVALIDATED,
+      displaySetInstanceUID
+    );
   }
 
   deleteDisplaySet(displaySetInstanceUID) {
@@ -139,7 +182,7 @@ export default class DisplaySetService {
     }
 
     // TODO: This is tricky. How do we know we're not resetting to the same/existing DSs?
-    // TODO: This is likely run anytime we touch DicomMetadataStore. How do we prevent uneccessary broadcasts?
+    // TODO: This is likely run anytime we touch DicomMetadataStore. How do we prevent unnecessary broadcasts?
     if (displaySetsAdded && displaySetsAdded.length) {
       this._broadcastEvent(EVENTS.DISPLAY_SETS_CHANGED, this.activeDisplaySets);
       this._broadcastEvent(EVENTS.DISPLAY_SETS_ADDED, {
@@ -151,13 +194,15 @@ export default class DisplaySetService {
     }
   };
 
-  makeDisplaySetForInstances(instances, settings) {
+  makeDisplaySetForInstances(instancesSrc, settings) {
+    let instances = instancesSrc;
     const instance = instances[0];
 
     const existingDisplaySets =
       this.getDisplaySetsForSeries(instance.SeriesInstanceUID) || [];
 
     const SOPClassHandlerIds = this.SOPClassHandlerIds;
+    let allDisplaySets;
 
     for (let i = 0; i < SOPClassHandlerIds.length; i++) {
       const SOPClassHandlerId = SOPClassHandlerIds[i];
@@ -174,6 +219,8 @@ export default class DisplaySetService {
         } else {
           displaySets = handler.getDisplaySetsFromSeries(instances);
 
+          if (!displaySets || !displaySets.length) continue;
+
           // applying hp-defined viewport settings to the displaysets
           displaySets.forEach(ds => {
             Object.keys(settings).forEach(key => {
@@ -183,10 +230,19 @@ export default class DisplaySetService {
 
           this._addDisplaySetsToCache(displaySets);
           this._addActiveDisplaySets(displaySets);
+
+          instances = instances.filter(
+            instance => !findInstance(instance, displaySets)
+          );
         }
 
-        return displaySets;
+        allDisplaySets = allDisplaySets
+          ? [...allDisplaySets, ...displaySets]
+          : displaySets;
+
+        if (!instances.length) return allDisplaySets;
       }
     }
+    return allDisplaySets;
   }
 }
