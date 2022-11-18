@@ -11,7 +11,11 @@ window.config = {
         qidoSupportsIncludeField: false,
         imageRendering: 'wadors',
         thumbnailRendering: 'wadors',
+        requestOptions: {
+          auth: 'orthanc:3ddiZVEx3wQpjKb',
+        },
       },
     ],
   },
+  studyListFunctionsEnabled: true,
 };

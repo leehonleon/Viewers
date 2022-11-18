@@ -41,10 +41,14 @@ export function setConfiguration(appConfig) {
 
     return appConfig.httpErrorHandler;
   };
-
+  const isActive = a => a.active === true;
   cornerstoneWADOImageLoader.configure({
     beforeSend: function(xhr) {
-      const headers = OHIF.DICOMWeb.getAuthorizationHeader();
+      // 因为设置requestOptions属性后，需要在请求中附带Authorization: Basic ?信息
+      const state = window.store.getState();
+      const activeServer = state.servers.servers.find(isActive);
+
+      const headers = OHIF.DICOMWeb.getAuthorizationHeader(activeServer);
 
       if (headers.Authorization) {
         xhr.setRequestHeader('Authorization', headers.Authorization);
